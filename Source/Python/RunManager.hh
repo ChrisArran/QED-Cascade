@@ -37,7 +37,7 @@ public:
     void setPusher(const std::string& pusherType);
 
     // Set if nonlinear Compton or nonlinear Breit-Wheeler are used
-    void setPhysics(bool NLC, bool NLBW);
+    void setPhysics(bool NLC, bool NLBW, bool CL, bool DET);
 
     // Simulates events
     void beamOn(int events, int threads = 1);
@@ -88,6 +88,8 @@ private:
     // Physics properties
     bool m_NLC;
     bool m_NLBW;
+    bool m_CL;
+    bool m_DET;
 
     // Generator properties
     bool m_genSet;

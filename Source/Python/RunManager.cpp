@@ -94,10 +94,12 @@ void RunManager::setGenerator(const std::string& particleType,
     m_direction = direction;
 }
 
-void RunManager::setPhysics(bool NLC, bool NLBW)
+void RunManager::setPhysics(bool NLC, bool NLBW, bool CL, bool DET)
 {
     m_NLC = NLC;
     m_NLBW = NLBW;
+    m_CL = CL;
+    m_DET = DET;
 }
 
 
@@ -166,6 +168,13 @@ void RunManager::beamOn(int events, int threads)
             m_timeStep, false);
         m_processList.push_back(breitWheeler);
     }
+    if (m_DET == true)
+    {
+        DeterministicEmission* compton = new DeterministicEmission(m_field, m_timeStep,
+                false, m_CL, 0);
+        m_processList.push_back(compton);
+    }
+
 
     // set the generator
     m_generator = new SourceGenerator(m_particleType, m_energyDist, events, 
