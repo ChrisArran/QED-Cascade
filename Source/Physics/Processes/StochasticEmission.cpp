@@ -41,7 +41,7 @@ void StochasticEmission::Interact(Particle *part, ParticleList *partList) const
         ThreeVector gammaP = gammaE * part->GetDirection();
         part->UpdateTrack(part->GetPosition(), part->GetMomentum() - gammaP);
         // Add new partles to the simulation
-        if (gammaE > m_eMin && m_sampleFrac < MCTools::RandDouble(0, 1))
+        if (gammaE > m_eMin && MCTools::RandDouble(0, 1) < m_sampleFrac)
         {
             Photon* photon = new Photon(gammaE, part->GetPosition(), 
                 part->GetDirection(), part->GetWeight() / m_sampleFrac,
