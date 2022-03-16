@@ -27,7 +27,7 @@ GaussianEMField::~GaussianEMField()
 void GaussianEMField::GetField(double time, const ThreeVector &position,
 						  ThreeVector &eField, ThreeVector &bField) const
 {
-	ThreeVector position_p = m_rotaion * position;
+	ThreeVector position_p = m_rotaion * (position - m_focusPos);
 	double t0 		 = (m_startPos - m_focusPos).Mag();
 	double r2 		 = position_p[0] * position_p[0] + position_p[1] * position_p[1];
 	double rayleigh  = m_waveNum * m_waist * m_waist / 2.0;

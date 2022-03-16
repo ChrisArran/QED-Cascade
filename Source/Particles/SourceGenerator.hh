@@ -14,6 +14,7 @@ class SourceGenerator
                     double deltaTau, double deltaDir,
                     const ThreeVector &position,
                     const ThreeVector &direction,
+                    double l0 = 0.0,
                     bool track = false);
     
     ~SourceGenerator();
@@ -39,5 +40,7 @@ private:
     unsigned int m_partCount;
     ThreeMatrix m_rotaion;
     bool m_track;
+    double m_l0;
+    ThreeVector spatialOffset;
 };
 #endif

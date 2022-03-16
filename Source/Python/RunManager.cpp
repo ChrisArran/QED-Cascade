@@ -83,7 +83,7 @@ void RunManager::setPhysics(const std::string& physics)
 void RunManager::setGenerator(const std::string& particleType,
     const std::string& energyDist, double energyParam1, double energyParam2,
     double radius, double duration, double divergence, 
-    const ThreeVector& position, const ThreeVector& direction)
+    const ThreeVector& position, const ThreeVector& direction, double l0)
 {
     m_genSet = true;
     m_particleType = particleType;
@@ -95,6 +95,7 @@ void RunManager::setGenerator(const std::string& particleType,
     m_divergence = divergence;
     m_position = position / m_units->RefLength();
     m_direction = direction;
+    m_l0 = l0 / m_units->RefLength();
 }
 
 void RunManager::setSampleFraction(double sampleFrac)
@@ -186,7 +187,7 @@ void RunManager::beamOn(int events, int threads)
     // set the generator
     m_generator = new SourceGenerator(m_particleType, m_energyDist, events, 
         m_energyParam1, m_energyParam2, m_radius, m_particleDuration, 
-        m_divergence, m_position, m_direction);
+        m_divergence, m_position, m_direction, m_l0);
 
     m_input_P_X = std::vector<std::vector<double>>(threads);
     m_electron_P_X = std::vector<std::vector<double>>(threads);

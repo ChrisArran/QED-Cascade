@@ -31,7 +31,7 @@ public:
     void setGenerator(const std::string& particleType,
         const std::string& energyDist, double energyParam1, double energyParam2,
         double radius, double duration, double divergence, 
-        const ThreeVector& position, const ThreeVector& direction);
+        const ThreeVector& position, const ThreeVector& direction, double l0);
 
     // Set if nonlinear Compton or nonlinear Breit-Wheeler are used
     void setPhysics(const std::string& physics);
@@ -103,5 +103,6 @@ private:
     double m_divergence;
     ThreeVector m_position;
     ThreeVector m_direction;
+    double m_l0;
 };
 #endif

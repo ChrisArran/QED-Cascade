@@ -26,7 +26,7 @@ FocusingField::~FocusingField()
 void FocusingField::GetField(double time, const ThreeVector &position,
     ThreeVector &eField, ThreeVector &bField) const
 {
-    ThreeVector position_p = m_rotaion * position;
+    ThreeVector position_p = m_rotaion * (position - m_focusPos);
     double xe = position_p[0] / m_waist;
     double ye = position_p[1] / m_waist;
     double ze = position_p[2] / m_rayleigh;

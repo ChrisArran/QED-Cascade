@@ -10,6 +10,7 @@ SourceGenerator::SourceGenerator(std::string type, std::string distro,
                                  double deltaTau, double deltaDir,
                                  const ThreeVector &position,
                                  const ThreeVector &direction,
+                                 double l0,
                                  bool track):
 m_type(type), m_nPart(nPart), m_partCount(0), m_track(track)
 {
@@ -32,6 +33,7 @@ m_type(type), m_nPart(nPart), m_partCount(0), m_track(track)
     }
     
     m_rotaion = m_direction.RotateToAxis(ThreeVector(0, 0, 1));
+    m_l0 = l0;
 }
 
 SourceGenerator::~SourceGenerator()
@@ -47,17 +49,19 @@ ParticleList* SourceGenerator::GenerateList()
     }
     ParticleList* list = new ParticleList(std::to_string(m_partCount));
 
-    ThreeVector partPosition = ThreeVector(m_xPos[m_partCount],
-                                           m_yPos[m_partCount],
-                                           m_zPos[m_partCount]);
-    partPosition = m_rotaion * partPosition + m_position;
-
     ThreeVector partDirection = ThreeVector(std::sin(m_thetaDir[m_partCount])
                                           * std::cos(m_phiDir[m_partCount]),
                                             std::sin(m_thetaDir[m_partCount])
                                           * std::sin(m_phiDir[m_partCount]),
                                             std::cos(m_thetaDir[m_partCount]));
     partDirection = m_rotaion * partDirection;
+
+    ThreeVector spatialOffset = m_l0 * (partDirection - m_direction);
+
+    ThreeVector partPosition = ThreeVector(m_xPos[m_partCount],
+                                           m_yPos[m_partCount],
+                                           m_zPos[m_partCount]);
+    partPosition = m_rotaion * partPosition + m_position + spatialOffset;
 
     if (m_type == "Photon" || m_type == "photon")
     {
