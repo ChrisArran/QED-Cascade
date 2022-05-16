@@ -6,7 +6,7 @@
 #include "UnitsSystem.hh"
 #include "MCTools.hh"
 
-NonLinearBreitWheeler::NonLinearBreitWheeler(EMField* field, double dt, bool track, double up_scale=1.0):
+NonLinearBreitWheeler::NonLinearBreitWheeler(EMField* field, double dt, bool track, double up_scale):
 Process(field, dt, track)
 {
     LoadTables();

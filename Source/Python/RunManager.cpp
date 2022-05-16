@@ -111,7 +111,7 @@ void RunManager::setSampleFraction(double sampleFrac)
 }
 
 
-void RunManager::usePairProduction(bool useBW, double up_scale = 1.0)
+void RunManager::usePairProduction(bool useBW, double up_scale)
 {
     m_useBW = useBW;
     m_up_scale = up_scale;
