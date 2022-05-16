@@ -111,9 +111,10 @@ void RunManager::setSampleFraction(double sampleFrac)
 }
 
 
-void RunManager::usePairProduction(bool useBW)
+void RunManager::usePairProduction(bool useBW, double up_scale)
 {
     m_useBW = useBW;
+    m_up_scale = up_scale;
 }
 
 void RunManager::beamOn(int events, int threads)
@@ -180,7 +181,7 @@ void RunManager::beamOn(int events, int threads)
     if (m_useBW == true)
     {
         NonLinearBreitWheeler* breitWheeler = new NonLinearBreitWheeler(m_field, 
-            m_timeStep, false);
+            m_timeStep, false, m_up_scale);
         m_processList.push_back(breitWheeler);
     }
 

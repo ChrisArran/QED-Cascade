@@ -40,7 +40,7 @@ public:
     void setSampleFraction(double frac);
 
     // Turn nonlinear Breit-Wheeler process on
-    void usePairProduction(bool useBW);
+    void usePairProduction(bool useBW, double up_scale = 1.0);
 
     // Simulates events
     void beamOn(int events, int threads = 1);
@@ -91,6 +91,7 @@ private:
 
     // Physics properties
     bool m_useBW;
+    double m_up_scale;
 
     // Generator properties
     bool m_genSet;
