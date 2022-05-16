@@ -40,7 +40,7 @@ public:
     void setSampleFraction(double frac);
 
     // Turn nonlinear Breit-Wheeler process on
-    void usePairProduction(bool useBW, double up_scale = 1.0);
+    void usePairProduction(bool useBW, double up_scale);
 
     // Simulates events
     void beamOn(int events, int threads = 1);
