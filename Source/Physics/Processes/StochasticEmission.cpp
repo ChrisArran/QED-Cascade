@@ -38,6 +38,12 @@ void StochasticEmission::Interact(Particle *part, ParticleList *partList) const
     {
         double chi = CalculateChi(eta);
         double gammaE = 2.0 * chi * part->GetGamma() / eta;
+        if (gammaE > part->GetGamma())
+        {
+            std::cerr << "Photon energy too high in StochasticEmission::Interact, "
+                << "E = " << gammaE << " m_ec^2" << " from eta = " << eta << ", chi = " << chi
+                << std::endl;
+        }
         ThreeVector gammaP = gammaE * part->GetDirection();
         part->UpdateTrack(part->GetPosition(), part->GetMomentum() - gammaP);
         // Add new partles to the simulation

@@ -21,7 +21,7 @@
 RunManager::RunManager():
 m_timeStep(0), m_timeEnd(0), m_field(nullptr), m_pusher(nullptr), 
 m_generator(nullptr), m_fieldSet(false), m_physSet(false), m_genSet(false),
-m_sampleFrac(1), m_useBW(false)
+m_sampleFrac(1), m_useBW(false), m_beaming(false)
 {
     // Update this if I ever add another unit system
     m_units = new UnitsSystem("SI");
