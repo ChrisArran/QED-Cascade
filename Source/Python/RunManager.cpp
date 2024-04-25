@@ -104,16 +104,8 @@ void RunManager::setGenerator(const std::string& particleType,
 
 void RunManager::setSampleFraction(double sampleFrac)
 {
-    if (sampleFrac >= 0 && sampleFrac <= 1)
-    {
-        m_sampleFrac = sampleFrac;
-    } else
-    {
-        std::cerr << "Error: Sampling fraction must be between 0 and 1."
-                  << std::endl;
-    }
+    m_sampleFrac = sampleFrac;
 }
-
 
 void RunManager::usePairProduction(bool useBW, double up_scale)
 {

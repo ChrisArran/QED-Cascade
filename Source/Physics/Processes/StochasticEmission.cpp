@@ -33,8 +33,8 @@ void StochasticEmission::Interact(Particle *part, ParticleList *partList) const
         * std::pow(10.0, logh)
         / (part->GetGamma() * 2.0 * UnitsSystem::pi);
     part->UpdateOpticalDepth(deltaOD);
-    // Now check if process hass occured. If so then emmit and react
-    if (part->GetOpticalDepth() < 0.0)
+    // Now check if process has occurred. If so then emit and react
+    if ((m_sampleFrac <= 1.0) && (part->GetOpticalDepth() < 0.0))
     {
         double chi = CalculateChi(eta);
         double gammaE = 2.0 * chi * part->GetGamma() / eta;
@@ -46,7 +46,8 @@ void StochasticEmission::Interact(Particle *part, ParticleList *partList) const
         }
         ThreeVector gammaP = gammaE * part->GetDirection();
         part->UpdateTrack(part->GetPosition(), part->GetMomentum() - gammaP);
-        // Add new partles to the simulation
+        // Add new particles to the simulation
+        // Downsampling : only actually create a subset of these photons
         if (gammaE > m_eMin && MCTools::RandDouble(0, 1) < m_sampleFrac)
         {
             Photon* photon = new Photon(gammaE, part->GetPosition(), 
@@ -55,5 +56,39 @@ void StochasticEmission::Interact(Particle *part, ParticleList *partList) const
             partList->AddParticle(photon);
         }
         part->InitOpticalDepth();
+    } else if (m_sampleFrac > 1.0)
+    // Upscaling : sample at higher than the normal rate of emission and reduce particle weights accordingly
+    // Use a different algorithm to ensure emissions are still independent
+    {
+        double lambda = deltaOD * m_sampleFrac;
+        int n = MCTools::RandPoisson(lambda);
+        // Emit a photon
+        if (n > 0)
+        {
+            double chi = CalculateChi(eta);
+            double gammaE = 2.0 * chi * part->GetGamma() / eta;
+            double newweight = part->GetWeight()*n/m_sampleFrac;
+            if (gammaE > m_eMin)
+            {
+                Photon* photon = new Photon(gammaE, part->GetPosition(), 
+                        part->GetDirection(), newweight,
+                        part->GetTime(), m_track);
+                partList->AddParticle(photon);
+            }
+
+            part->SetWeight( part->GetWeight() - newweight );
+            ThreeVector gammaP = gammaE * part->GetDirection();
+
+            // Create a new daughter lepton that experiences radiation reaction
+            // Enforce a minimum weight to stop exponential increase in particle number
+            if (newweight > pow(m_sampleFrac,-3))
+            {
+                Lepton* littlepart = new Lepton(part->GetMass(), part->GetCharge(), part->GetPosition(), 
+                        part->GetMomentum() - gammaP, newweight,
+                        part->GetTime(), m_track);
+                partList->AddParticle(littlepart);
+            }
+        }
     }
 }
+
