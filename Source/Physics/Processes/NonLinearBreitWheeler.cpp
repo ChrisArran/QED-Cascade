@@ -30,7 +30,7 @@ void NonLinearBreitWheeler::Interact(Particle *part, ParticleList *partList) con
         / part->GetEnergy();
 
     // Upscaling : calculate the number of pairs created, including weight and up_scale
-    double lambda = deltaOD*part->GetWeight()*m_up_scale;    
+    double lambda = deltaOD*m_up_scale;    
     int n = MCTools::RandPoisson(lambda);
 
     // Either produce a pair with a weight of n or return
@@ -64,12 +64,8 @@ void NonLinearBreitWheeler::Interact(Particle *part, ParticleList *partList) con
     partList->AddParticle(positron);
     partList->AddParticle(electron);
     
-    // Replace photon with new photon with reduced weight
-    Photon* photon = new Photon(part->GetEnergy(), part->GetPosition(), 
-            part->GetDirection(), part->GetWeight() - n/m_up_scale, part->GetTime(), m_track);
-    partList->AddParticle(photon);
-
-    part->Kill();
+    // Reduce weight of photon
+    part->SetWeight(part->GetWeight() * (1.0 - n/m_up_scale));
 
 }
 
@@ -182,3 +178,4 @@ void NonLinearBreitWheeler::UnloadTables()
     }
     delete [] m_eFract_dataTable;
 }
+

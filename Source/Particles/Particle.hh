@@ -41,6 +41,8 @@ public:
 
     double GetWeight() const {return m_weight;}
 
+    void SetWeight(double new_weight) {m_weight = new_weight;}
+
     double GetOpticalDepth() const {return m_opticalDepth;}
 
     bool IsAlive() const {return m_isAlive;}
@@ -85,3 +87,4 @@ protected:
 };
 
 #endif
+
