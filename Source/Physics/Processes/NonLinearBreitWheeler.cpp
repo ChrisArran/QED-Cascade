@@ -1,4 +1,5 @@
 #include <fstream>
+#include <random>
 
 #include "NonLinearBreitWheeler.hh"
 #include "Lepton.hh"
@@ -25,7 +26,7 @@ void NonLinearBreitWheeler::Interact(Particle *part, ParticleList *partList) con
     double chi = CalculateChi(part);
     double logt = Numerics::Interpolate1D(m_t_chiAxis, m_t_dataTable,
         m_t_length, std::log10(chi));
-    double deltaOD = m_up_scale * m_dt * UnitsSystem::alpha * chi * std::pow(10.0, logt)
+    double deltaOD = m_dt * UnitsSystem::alpha * chi * std::pow(10.0, logt)
         / part->GetEnergy();
 
     // Upscaling : calculate the number of pairs created, including weight and up_scale
@@ -70,6 +71,7 @@ void NonLinearBreitWheeler::Interact(Particle *part, ParticleList *partList) con
     } else {
         part->Kill();
     }
+
 }
 
 double NonLinearBreitWheeler::CalculateSplit(double chi) const
@@ -181,3 +183,4 @@ void NonLinearBreitWheeler::UnloadTables()
     }
     delete [] m_eFract_dataTable;
 }
+
