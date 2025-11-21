@@ -27,22 +27,47 @@ void NonLinearBreitWheeler::Interact(Particle *part, ParticleList *partList) con
         m_t_length, std::log10(chi));
     double deltaOD = m_up_scale * m_dt * UnitsSystem::alpha * chi * std::pow(10.0, logt)
         / part->GetEnergy();
-    part->UpdateOpticalDepth(deltaOD);
 
-    // Now check if process hass occured. If so then emmit and react
-    if (part->GetOpticalDepth() < 0.0)
+    // Upscaling : calculate the number of pairs created, including weight and up_scale
+    double lambda = deltaOD*m_up_scale*part->GetWeight();    
+    int n = MCTools::RandPoisson(lambda);
+
+    // Either produce a pair with a weight of n or return
+    if (n == 0) return;
+    double split;
+    try {
+        split = CalculateSplit(chi);
+    }
+    catch (double logchi) {
+        std::cerr << "Interpolation out of range during NonLinearBreitWheeler::CalculateSplit, "
+            << "log10(chi)=" << logchi << " > log10(chimax)=" << m_eFract_chiAxis[m_efract_length-1]
+            << std::endl;
+        ThreeVector eField, bField;
+        ThreeVector partDir = part->GetDirection();
+        m_field->GetField(part->GetTime(), part->GetPosition(), eField, bField);
+        ThreeVector ePara = eField.Dot(partDir) * partDir;
+        ThreeVector ePerp = eField - ePara;
+        double F = (ePerp + partDir.Cross(bField)).Mag();
+        std::cerr << "Photon energy = " << part->GetEnergy() << " m_ec^2, (E+vxB)/Es = " << F
+            << std::endl;
+		std::exit(-1);
+    }
+    double pEnergy = split * part->GetEnergy();
+    double eEnergy = (1.0 - split) * part->GetEnergy();
+    ThreeVector pMomentum =  std::sqrt(pEnergy * pEnergy - 1.0) * part->GetDirection();
+    ThreeVector eMomentum =  std::sqrt(eEnergy * eEnergy - 1.0) * part->GetDirection();
+    Lepton* positron = new Lepton(1.0, 1.0, part->GetPosition(), pMomentum,
+        n/m_up_scale, part->GetTime(), m_track); 
+    Lepton* electron = new Lepton(1.0, -1.0, part->GetPosition(), eMomentum, 
+        n/m_up_scale, part->GetTime(), m_track);
+    partList->AddParticle(positron);
+    partList->AddParticle(electron);
+    
+    if (part->GetWeight() > n/m_up_scale)
     {
-        double split = CalculateSplit(chi);
-        double pEnergy = split * part->GetEnergy();
-        double eEnergy = (1.0 - split) * part->GetEnergy();
-        ThreeVector pMomentum =  std::sqrt(pEnergy * pEnergy - 1.0) * part->GetDirection();
-        ThreeVector eMomentum =  std::sqrt(eEnergy * eEnergy - 1.0) * part->GetDirection();
-        Lepton* positron = new Lepton(1.0, 1.0, part->GetPosition(), pMomentum,
-            part->GetWeight(), part->GetTime(), m_track); 
-        Lepton* electron = new Lepton(1.0, -1.0, part->GetPosition(), eMomentum, 
-            part->GetWeight(), part->GetTime(), m_track);
-        partList->AddParticle(positron);
-        partList->AddParticle(electron);
+        // Reduce weight of photon
+        part->SetWeight(part->GetWeight() - n/m_up_scale);
+    } else {
         part->Kill();
     }
 }
