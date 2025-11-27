@@ -38,8 +38,14 @@ double PhotonEmission::CalculateChi(double eta) const
     double rand = MCTools::RandDouble(0, 1);
     int lowIndex;
     double frac;
-    Numerics::ClosestPoints(m_phEn_etaAxis, m_phEn_etaLength, std::log10(eta),
+    try {
+        Numerics::ClosestPoints(m_phEn_etaAxis, m_phEn_etaLength, std::log10(eta),
         lowIndex, frac);
+    } catch (double queryPoint) {
+        std::cerr << "Error: Failed in PhotonEmission::CalculateChi, with log10(eta)="
+			<< std::log10(eta) << std::endl;
+        std::exit(-1);
+    }
     double lowValue = Numerics::Interpolate1D(m_phEn_dataTable[lowIndex],
         m_phEn_chiAxis[lowIndex], m_phEn_chiLength, rand);
     double highValue = Numerics::Interpolate1D(m_phEn_dataTable[lowIndex+1],

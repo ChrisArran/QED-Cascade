@@ -26,14 +26,27 @@ double PhotonBeamingEmission::CalculateZ(double eta, double u) const
     double lowValue, highValue, logz, z;
     if (std::log10(eta) > m_phZ_etaAxis[0])
     {
-        Numerics::ClosestPoints(m_phZ_etaAxis, m_phZ_etaLength, std::log10(eta),
-            etaIndex, fracEta);
+        try {
+            Numerics::ClosestPoints(m_phZ_etaAxis, m_phZ_etaLength, std::log10(eta),
+                etaIndex, fracEta);
+        catch (int queryPoint) {
+            std::cerr << "Error: Failed in PhotonBeamingEmission::CalculateZ, with log10(eta)="
+                << std::log10(eta) << std::endl;
+            std::exit(-1);
+        }
+        }
         if (std::log10(u) > m_phZ_uAxis[etaIndex][0])
         {
-            Numerics::ClosestPoints(m_phZ_uAxis[etaIndex], m_phZ_uLength, std::log10(u),
-                uIndexlow, fracUlow);
-            Numerics::ClosestPoints(m_phZ_uAxis[etaIndex+1], m_phZ_uLength, std::log10(u),
-                uIndexhigh, fracUhigh);
+            try {
+                Numerics::ClosestPoints(m_phZ_uAxis[etaIndex], m_phZ_uLength, std::log10(u),
+                    uIndexlow, fracUlow);
+                Numerics::ClosestPoints(m_phZ_uAxis[etaIndex+1], m_phZ_uLength, std::log10(u),
+                    uIndexhigh, fracUhigh);
+            catch (int queryPoint) {
+                std::cerr << "Error: Failed in PhotonBeamingEmission::CalculateZ, with log10(u)="
+                    << std::log10(u) << std::endl;
+                std::exit(-1);                
+            }
             double lowlowValue = Numerics::Interpolate1D(m_phZ_dataTable[etaIndex][uIndexlow],
                 m_phZ_zAxis[etaIndex][uIndexlow], m_phZ_zLength, rand);
             double lowhighValue = Numerics::Interpolate1D(m_phZ_dataTable[etaIndex][uIndexlow+1],
@@ -62,8 +75,14 @@ double PhotonBeamingEmission::CalculateZ(double eta, double u) const
         if (std::log10(u) > m_phZ_uAxis[0][0])
         {
             // Extrapolate downwards in eta using a constant u*z/eta
-            Numerics::ClosestPoints(m_phZ_uAxis[0], m_phZ_uLength, std::log10(u),
-                    uIndexlow, fracUlow);
+            try {
+                Numerics::ClosestPoints(m_phZ_uAxis[0], m_phZ_uLength, std::log10(u),
+                        uIndexlow, fracUlow);
+            } catch (int queryPoint) {
+                std::cerr << "Error: Failed in PhotonBeamingEmission::CalculateZ, with log10(u)="
+                    << std::log10(u) << std::endl;
+                std::exit(-1);                   
+            }
             lowValue = Numerics::Interpolate1D(m_phZ_dataTable[0][uIndexlow],
                     m_phZ_zAxis[0][uIndexlow], m_phZ_zLength, rand);
             highValue = Numerics::Interpolate1D(m_phZ_dataTable[0][uIndexlow+1],

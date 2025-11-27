@@ -79,8 +79,14 @@ double NonLinearBreitWheeler::CalculateSplit(double chi) const
     double rand = MCTools::RandDouble(0, 1);
     int lowIndex;
     double frac;
-    Numerics::ClosestPoints(m_eFract_chiAxis, m_efract_length, std::log10(chi),
+    try {
+        Numerics::ClosestPoints(m_eFract_chiAxis, m_efract_length, std::log10(chi),
         lowIndex, frac);
+    } catch (double queryPoint) {
+        std::cerr << "Error: Failed in NonLinearBreitWheeler::CalculateSplit, with log10(chi)="
+			<< std::log10(chi) << std::endl;
+        std::exit(-1);
+    }
     double lowValue = Numerics::Interpolate1D(m_eFract_dataTable[lowIndex],
         m_eFract_fractAxis, m_efract_length, rand);
     double highValue = Numerics::Interpolate1D(m_eFract_dataTable[lowIndex+1],

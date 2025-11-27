@@ -108,7 +108,9 @@ void Numerics::ClosestPoints(double* samplePoints, unsigned int sampleSize,
 	{
 		std::cerr << "Error: Tables can't handle your extreme simulation."
 			<< std::endl;
+		std::cerr << "Query point " << queryPoint << " above end of table at " << samplePoints[sampleSize-1]
+			<< std::endl;
 		throw (queryPoint);
-		std::exit(-1);
+//		std::exit(-1);
 	}
 }
