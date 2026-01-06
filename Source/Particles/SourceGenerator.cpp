@@ -11,6 +11,7 @@ SourceGenerator::SourceGenerator(std::string type, std::string distro,
                                  const ThreeVector &position,
                                  const ThreeVector &direction,
                                  double l0,
+                                 double rejectDistance,
                                  bool track):
 m_type(type), m_nPart(nPart), m_partCount(0), m_track(track)
 {
@@ -34,6 +35,10 @@ m_type(type), m_nPart(nPart), m_partCount(0), m_track(track)
     
     m_rotaion = m_direction.RotateToAxis(ThreeVector(0, 0, 1));
     m_l0 = l0;
+    m_deltaPos = deltaPos;
+    m_deltaTau = deltaTau;
+    m_deltaDir = deltaDir;
+    m_rejectDistance = rejectDistance;
 }
 
 SourceGenerator::~SourceGenerator()
@@ -62,21 +67,50 @@ ParticleList* SourceGenerator::GenerateList()
                                            m_yPos[m_partCount],
                                            m_zPos[m_partCount]);
     partPosition = m_rotaion * partPosition + m_position + spatialOffset;
+    
+    // Repeated rejection sampling of particles that won't pass within a distance rejectDistance of the origin
+    int sampleNumber = 1;
+    if (m_rejectDistance > 0.0) 
+    {
+        double perpDistance = (partPosition - partPosition.Dot(partDirection.Norm())).Mag();
+        double xPos, yPos, zPos, thetaDir, phiDir;
+        while (perpDistance > m_rejectDistance)
+        {
+            xPos = MCTools::SampleNorm(0, m_deltaPos, 1)[0];
+            yPos = MCTools::SampleNorm(0, m_deltaPos, 1)[0];
+            zPos = MCTools::SampleNorm(0, m_deltaTau, 1)[0];
+            thetaDir = MCTools::SampleNorm(0, m_deltaDir, 1)[0];
+            phiDir = MCTools::SampleUniform(0, 2.0 * UnitsSystem::pi, 1)[0];
+
+            partDirection = ThreeVector(std::sin(thetaDir) * std::cos(phiDir),
+                                        std::sin(thetaDir) * std::sin(phiDir),
+                                        std::cos(thetaDir));
+            partDirection = m_rotaion * partDirection;
+            spatialOffset = m_l0 * (partDirection - m_direction);
+            partPosition = ThreeVector(xPos, yPos, zPos);
+            partPosition = m_rotaion * partPosition + m_position + spatialOffset;
+            
+            perpDistance = (partPosition - partPosition.Dot(partDirection.Norm())).Mag();
+            sampleNumber++;
+        }
+    }
+    
+    double weight = 1.0/double(sampleNumber);
 
     if (m_type == "Photon" || m_type == "photon")
     {
         Photon* part = new Photon(m_energy[m_partCount], partPosition,
-            partDirection, 1, 0, m_track);
+            partDirection, weight, 0, m_track);
         list->AddParticle(part);
     } else if (m_type == "Electron" || m_type == "electron")
     {
         Lepton* part = new Lepton(1.0, -1.0, m_energy[m_partCount],
-            partPosition, partDirection, 1, 0, m_track);
+            partPosition, partDirection, weight, 0, m_track);
         list->AddParticle(part);
     } else if (m_type == "Positron" || m_type == "positron")
     {
         Lepton* part = new Lepton(1.0, 1.0, m_energy[m_partCount],
-            partPosition, partDirection, 1, 0, m_track);
+            partPosition, partDirection, weight, 0, m_track);
         list->AddParticle(part);
     } else
     {

@@ -15,6 +15,7 @@ class SourceGenerator
                     const ThreeVector &position,
                     const ThreeVector &direction,
                     double l0 = 0.0,
+                    double rejectDistance = 0.0,
                     bool track = false);
     
     ~SourceGenerator();
@@ -41,6 +42,10 @@ private:
     ThreeMatrix m_rotaion;
     bool m_track;
     double m_l0;
+    double m_rejectDistance;
+    double m_deltaPos;
+    double m_deltaTau;
+    double m_deltaDir;
     ThreeVector spatialOffset;
 };
 #endif
