@@ -29,11 +29,10 @@ double PhotonBeamingEmission::CalculateZ(double eta, double u) const
         try {
             Numerics::ClosestPoints(m_phZ_etaAxis, m_phZ_etaLength, std::log10(eta),
                 etaIndex, fracEta);
-        catch (int queryPoint) {
+        } catch (int queryPoint) {
             std::cerr << "Error: Failed in PhotonBeamingEmission::CalculateZ, with log10(eta)="
                 << std::log10(eta) << std::endl;
             std::exit(-1);
-        }
         }
         if (std::log10(u) > m_phZ_uAxis[etaIndex][0])
         {
@@ -42,7 +41,7 @@ double PhotonBeamingEmission::CalculateZ(double eta, double u) const
                     uIndexlow, fracUlow);
                 Numerics::ClosestPoints(m_phZ_uAxis[etaIndex+1], m_phZ_uLength, std::log10(u),
                     uIndexhigh, fracUhigh);
-            catch (int queryPoint) {
+            } catch (int queryPoint) {
                 std::cerr << "Error: Failed in PhotonBeamingEmission::CalculateZ, with log10(u)="
                     << std::log10(u) << std::endl;
                 std::exit(-1);                
