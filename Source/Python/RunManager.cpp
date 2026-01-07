@@ -101,11 +101,6 @@ void RunManager::setGenerator(const std::string& particleType,
     m_direction = direction;
     m_l0 = l0 / m_units->RefLength();
     m_rejectDistance = rejectDistance / m_units->RefLength();
-    
-    std::cout << "Debug RunManager: rejectDistance = " << rejectDistance*1e6 << " um, or " << m_rejectDistance << std::endl;
-    std::cout << "Debug RunManager: position = " << position[0]*1e6 << ", " << position[1]*1e6 << ", " << position[2]*1e6 << " um, or " << m_position[0] << ", " << m_position[1] << ", " << m_position[2] << std::endl;
-    double perpDistance = (position - direction.Norm()*(position.Dot(direction.Norm()))).Mag();
-    std::cout << "Debug RunManager: perpDistance = " << perpDistance*1e6 << " um, or " << perpDistance / m_units->RefLength() << std::endl;
 }
 
 void RunManager::setSampleFraction(double sampleFrac)

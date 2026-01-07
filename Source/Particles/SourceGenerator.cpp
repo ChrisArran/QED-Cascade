@@ -89,16 +89,6 @@ ParticleList* SourceGenerator::GenerateList()
             perpDistance = (partPosition - partDirection.Norm()*partPosition.Dot(partDirection.Norm())).Mag();
             sampleNumber++;
         }
-        std::cout << "Debug SourceGenerator: At l0 = " << m_l0 << ", accepted sampleNumber " << sampleNumber << std::endl;
-        std::cout << "Debug SourceGenerator: Location = " << partPosition[0] << ", " << partPosition[1] << ", " << partPosition[2] << std::endl;
-        std::cout << "Debug SourceGenerator: Direction = " << partDirection[0] << ", " << partDirection[1] << ", " << partDirection[2] << std::endl;
-        if (sampleNumber < sampleMax)
-        {
-            std::cout << "Debug SourceGenerator: Giving perpDistance = " << perpDistance << " < " << m_rejectDistance << std::endl;
-        } else
-            std::cout << "Debug SourceGenerator: Giving perpDistance = " << perpDistance << " > " << m_rejectDistance << std::endl;
-        {
-        }
     }
     
     weight = 1.0/double(sampleNumber);
