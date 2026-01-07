@@ -46,7 +46,7 @@ SourceGenerator::~SourceGenerator()
 }
 
 ParticleList* SourceGenerator::GenerateList()
-{
+{    
     if (m_partCount == m_nPart)
     {
         std::cerr << "Error: Particle source depleted." << std::endl;
@@ -61,24 +61,21 @@ ParticleList* SourceGenerator::GenerateList()
                                             std::cos(m_thetaDir[m_partCount]));
     partDirection = m_rotaion * partDirection;
 
-    ThreeVector spatialOffset = m_l0 * (partDirection - m_direction);
-
-    ThreeVector partPosition = ThreeVector(m_xPos[m_partCount],
+    ThreeVector relativePosition = ThreeVector(m_xPos[m_partCount],
                                            m_yPos[m_partCount],
                                            m_zPos[m_partCount]);
-    partPosition = m_rotaion * partPosition + m_position + spatialOffset;
+    ThreeVector partPosition = m_position + m_rotaion * relativePosition + m_l0 * (partDirection - m_direction);
     
     // Repeated rejection sampling of particles that won't pass within a distance rejectDistance of the origin
     int sampleNumber = 1;
+    int sampleMax = 10000;
+    double perpDistance, xPos, yPos, zPos, thetaDir, phiDir, weight;
+
     if (m_rejectDistance > 0.0) 
     {
-        double perpDistance = (partPosition - partPosition.Dot(partDirection.Norm())).Mag();
-        double xPos, yPos, zPos, thetaDir, phiDir;
-        while (perpDistance > m_rejectDistance)
+        perpDistance = (partPosition - partDirection.Norm()*partPosition.Dot(partDirection.Norm())).Mag();
+        while ((perpDistance > m_rejectDistance) and (sampleNumber < sampleMax))
         {
-            xPos = MCTools::SampleNorm(0, m_deltaPos, 1)[0];
-            yPos = MCTools::SampleNorm(0, m_deltaPos, 1)[0];
-            zPos = MCTools::SampleNorm(0, m_deltaTau, 1)[0];
             thetaDir = MCTools::SampleNorm(0, m_deltaDir, 1)[0];
             phiDir = MCTools::SampleUniform(0, 2.0 * UnitsSystem::pi, 1)[0];
 
@@ -86,16 +83,25 @@ ParticleList* SourceGenerator::GenerateList()
                                         std::sin(thetaDir) * std::sin(phiDir),
                                         std::cos(thetaDir));
             partDirection = m_rotaion * partDirection;
-            spatialOffset = m_l0 * (partDirection - m_direction);
-            partPosition = ThreeVector(xPos, yPos, zPos);
-            partPosition = m_rotaion * partPosition + m_position + spatialOffset;
             
-            perpDistance = (partPosition - partPosition.Dot(partDirection.Norm())).Mag();
+            partPosition = m_position + m_rotaion * relativePosition + m_l0 * (partDirection - m_direction);
+            
+            perpDistance = (partPosition - partDirection.Norm()*partPosition.Dot(partDirection.Norm())).Mag();
             sampleNumber++;
+        }
+        std::cout << "Debug SourceGenerator: At l0 = " << m_l0 << ", accepted sampleNumber " << sampleNumber << std::endl;
+        std::cout << "Debug SourceGenerator: Location = " << partPosition[0] << ", " << partPosition[1] << ", " << partPosition[2] << std::endl;
+        std::cout << "Debug SourceGenerator: Direction = " << partDirection[0] << ", " << partDirection[1] << ", " << partDirection[2] << std::endl;
+        if (sampleNumber < sampleMax)
+        {
+            std::cout << "Debug SourceGenerator: Giving perpDistance = " << perpDistance << " < " << m_rejectDistance << std::endl;
+        } else
+            std::cout << "Debug SourceGenerator: Giving perpDistance = " << perpDistance << " > " << m_rejectDistance << std::endl;
+        {
         }
     }
     
-    double weight = 1.0/double(sampleNumber);
+    weight = 1.0/double(sampleNumber);
 
     if (m_type == "Photon" || m_type == "photon")
     {

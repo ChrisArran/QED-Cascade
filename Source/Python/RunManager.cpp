@@ -87,7 +87,7 @@ void RunManager::setPhysics(const std::string& physics)
 void RunManager::setGenerator(const std::string& particleType,
     const std::string& energyDist, double energyParam1, double energyParam2,
     double radius, double duration, double divergence, 
-    const ThreeVector& position, const ThreeVector& direction, double l0)
+    const ThreeVector& position, const ThreeVector& direction, double l0, double rejectDistance)
 {
     m_genSet = true;
     m_particleType = particleType;
@@ -100,6 +100,12 @@ void RunManager::setGenerator(const std::string& particleType,
     m_position = position / m_units->RefLength();
     m_direction = direction;
     m_l0 = l0 / m_units->RefLength();
+    m_rejectDistance = rejectDistance / m_units->RefLength();
+    
+    std::cout << "Debug RunManager: rejectDistance = " << rejectDistance*1e6 << " um, or " << m_rejectDistance << std::endl;
+    std::cout << "Debug RunManager: position = " << position[0]*1e6 << ", " << position[1]*1e6 << ", " << position[2]*1e6 << " um, or " << m_position[0] << ", " << m_position[1] << ", " << m_position[2] << std::endl;
+    double perpDistance = (position - direction.Norm()*(position.Dot(direction.Norm()))).Mag();
+    std::cout << "Debug RunManager: perpDistance = " << perpDistance*1e6 << " um, or " << perpDistance / m_units->RefLength() << std::endl;
 }
 
 void RunManager::setSampleFraction(double sampleFrac)
@@ -224,7 +230,7 @@ void RunManager::beamOn(int events, int threads)
     // set the generator
     m_generator = new SourceGenerator(m_particleType, m_energyDist, events, 
         m_energyParam1, m_energyParam2, m_radius, m_particleDuration, 
-        m_divergence, m_position, m_direction, m_l0);
+        m_divergence, m_position, m_direction, m_l0, m_rejectDistance);
 
     m_input_P_X = std::vector<std::vector<double>>(threads);
     m_electron_P_X = std::vector<std::vector<double>>(threads);
