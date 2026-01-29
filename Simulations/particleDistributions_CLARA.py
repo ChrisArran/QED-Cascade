@@ -49,9 +49,9 @@ thetax_offsets = np.random.default_rng().normal(0, theta_std, Nsims)
 thetay_offsets = np.random.default_rng().normal(0, theta_std, Nsims)
 
 # Create all the empty arrays to put results in
-bins_e = np.linspace(0,4000,401)
-bins_g = np.linspace(0,2000,41)
-bins_p = np.linspace(0,2000,41)
+bins_e = np.linspace(0,300,301)
+bins_g = np.linspace(0,300,31)
+bins_p = np.linspace(0,300,31)
 histe_tot = 0
 histg_tot = 0
 histp_tot = 0
@@ -80,7 +80,7 @@ for j in range(Nsims):
     # Output the rates of positron and photon production on each simulated shot
 	positronrate[j] = np.sum(hist_p)/Nsamples
 	photonrate[j] = np.sum(hist_g)/Nsamples
-	rrrate[j] = np.sum(bins_g*hist_g)/(Nsamples*gamma0*0.511)
+	rrrate[j] = np.sum(0.5*(bins_g[:-1]+bins_g[1:])*hist_g)/Nsamples
 
 	if (Nsims>=100):
 		t2 = time.time()
@@ -95,7 +95,7 @@ if (Nsims<100):
 	print("%i simulations complete after %0.2fs: " % (Nsims,t2-t1) )
 
 exp = np.floor(np.log10(mean_rrrate))
-print('length: %1.3e mm; Radiation rate: (%1.3f+-%1.3f)x10^%1.3f' % (l0*1e3,mean_rrrate/10**exp,std_rrrate/10**exp,exp)
+print('length: %1.3e mm; Radiation rate: (%1.3f+-%1.3f)x10^%1.3f MeV/electron' % (l0*1e3,mean_rrrate/10**exp,std_rrrate/10**exp,exp))
 
 # Write the different particle spectra to text files
 dEe = bins_e[1]-bins_e[0]
@@ -112,17 +112,17 @@ np.savetxt('positronSpectrum' + filename + '.txt', np.transpose(np.vstack((bins_
 fig,axs = plt.subplots(2,2)
 
 # Cumulative number of shots producing greater than a certain number of pairs
-min_r = np.floor(np.log10(np.min(rrrate)*10e-12/1.6e-19))
-if min_r < -6:
-	min_r = -6
-max_r = np.ceil(np.log10(np.max(rrrate)*10e-12/1.6e-19))
-if max_r < 0:
-	max_r = 0
+min_r = np.floor(np.log10(np.min(rrrate)))
+if min_r < -10:
+	min_r = -10
+max_r = np.ceil(np.log10(np.max(rrrate)))
+if max_r < -4:
+	max_r = -4
 bins_r = np.logspace(min_r,max_r,10*int(max_r-min_r)+1)
-ratehist,binedges = np.histogram(positronrate*10e-12/1.6e-19,bins=bins_r,weights=np.ones_like(positronrate)/Nsims)
+ratehist,binedges = np.histogram(rrrate,bins=bins_r,weights=np.ones_like(rrrate)/Nsims)
 axs[0,0].plot(binedges[:-1],100*np.flipud(np.cumsum(np.flipud(ratehist))))
 axs[0,0].set_xscale('log')
-axs[0,0].set_xlabel('Radiated Energy > $E_γ/E_-$')
+axs[0,0].set_xlabel('Radiated Energy > $E_γ$ (MeV)')
 axs[0,0].set_ylabel('Cumulative % of shots')
 
 # Positron spectrum
@@ -131,7 +131,7 @@ axs[0,1].set_xlabel('$E_p$ (MeV)')
 axs[0,1].set_ylabel('Pairs per 10 pC')
 
 # Cumulative number of shots producting more than a certain number of photons
-bins_gr = np.logspace(-4,2,31)
+bins_gr = np.logspace(-6,0,31)
 photonratehist,photonbinedges = np.histogram(photonrate,bins=bins_gr,weights=np.ones_like(photonrate)/Nsims)
 axs[1,0].plot(photonbinedges[:-1],100*np.flipud(np.cumsum(np.flipud(photonratehist))))
 axs[1,0].set_xscale('log')
