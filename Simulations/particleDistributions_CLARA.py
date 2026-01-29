@@ -57,6 +57,7 @@ histg_tot = 0
 histp_tot = 0
 positronrate = np.zeros(Nsims)
 photonrate = np.zeros(Nsims)
+rrrate = np.zeros(Nsims)
 
 t1 = time.time()
 print("Setup in %0.2f s" % (t1-t0))
